@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 let user;
 let refreshTokens = [];
 //переменые для хранение хэдэров карэнтюзера и токона(в идиале переделать)
+
 let users = [{ username: "gg", password: "gg" }];
 
 //create
@@ -31,7 +32,8 @@ app.post("/create", (req, res) => {
   user = users.find((u) => u.username == username);
 
   if (!flag) {
-    if (user.username == username) res.send({ mass: "user already created", alrdCreate: true });
+    if (user.username == username)
+      res.send({ mass: "user already created", alrdCreate: true });
     else {
       users.push({ username: username, password: password });
 
@@ -39,7 +41,8 @@ app.post("/create", (req, res) => {
       res.send({ mass: "new user logged" });
     }
   } else {
-    if (user == undefined) res.send({ mass: "user dont exist", donExist: true });
+    if (user == undefined)
+      res.send({ mass: "user dont exist", donExist: true });
     else {
       user.password = password;
       // console.log(username);
@@ -52,49 +55,54 @@ app.post("/create", (req, res) => {
 
 //обработка аксестокена
 app.post("/posts", helpFuncs.authenticateToken, (req, res) => {
-  res.json({ success: true });
-});
-//обработка аксестокена
+  let users = [{ username: "gg", password: "gg" }];
 
-//создание токенов
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-  if (username === "" || password === "") {
-    res.json({ mass: "Username or password incorrect", status: false });
-  }
-  user = users.find((u) => {
-    return u.username === username && u.password === password;
+  //обработка аксестокена
+  app.post("/posts", helpFuncs.authenticateToken, (req, res) => {
+    res.json({ success: true });
   });
+  //обработка аксестокена
 
-  if (user) {
-    const accessToken = helpFuncs.generateAccessToken(user);
-    const refreshToken = jwt.sign(
-      { username: user.username },
-      process.env.REFRESH_TOKEN_SECRET
-    );
-    refreshTokens.push(refreshToken);
-
-    res.json({
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      status: true,
+  //создание токенов
+  app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+    if (username === "" || password === "") {
+      res.json({ mass: "Username or password incorrect", status: false });
+    }
+    user = users.find((u) => {
+      return u.username === username && u.password === password;
     });
-  } else {
-    res.json({ mass: "Username or password incorrect", status: false });
-  }
-});
-//создание токенов
 
-app.post("/token", (req, res) => {
-  const refreshToken = req.body.token;
-  if (refreshToken == null || undefined) return res.sendStatus(401);
-  if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+    if (user) {
+      const accessToken = helpFuncs.generateAccessToken(user);
+      const refreshToken = jwt.sign(
+        { username: user.username },
+        process.env.REFRESH_TOKEN_SECRET
+      );
+      refreshTokens.push(refreshToken);
 
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err) => {
-    if (err) return res.sendStatus(403);
-    const accessToken = helpFuncs.generateAccessToken(user);
-    //console.log('creating new atoken');
-    res.json({ accessToken: accessToken });
+      res.json({
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        status: true,
+      });
+    } else {
+      res.json({ mass: "Username or password incorrect", status: false });
+    }
+  });
+  //создание токенов
+
+  app.post("/token", (req, res) => {
+    const refreshToken = req.body.token;
+    if (refreshToken == null || undefined) return res.sendStatus(401);
+    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403);
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err) => {
+      if (err) return res.sendStatus(403);
+      const accessToken = helpFuncs.generateAccessToken(user);
+      //console.log('creating new atoken');
+      res.json({ accessToken: accessToken });
+    });
   });
 });
 //for JWT
