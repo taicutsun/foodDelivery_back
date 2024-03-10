@@ -53,15 +53,10 @@ app.post("/create", (req, res) => {
 
 //create
 
-//обработка аксестокена
-app.post("/posts", helpFuncs.authenticateToken, (req, res) => {
-  let users = [{ username: "gg", password: "gg" }];
-
   //обработка аксестокена
   app.post("/posts", helpFuncs.authenticateToken, (req, res) => {
     res.json({ success: true });
   });
-  //обработка аксестокена
 
   //создание токенов
   app.post("/login", (req, res) => {
@@ -104,7 +99,7 @@ app.post("/posts", helpFuncs.authenticateToken, (req, res) => {
       res.json({ accessToken: accessToken });
     });
   });
-});
+
 //for JWT
 
 //for basket and else
